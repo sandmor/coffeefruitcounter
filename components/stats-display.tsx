@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import type { DetectionResult } from "@/lib/types";
 import { CLASS_LABELS, CLASS_BG_COLORS } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Coffee, Timer, Hash } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
+import { Timer, Hash } from "lucide-react";
 
 interface StatsDisplayProps {
     result: DetectionResult | null;
@@ -18,7 +19,7 @@ export function StatsDisplay({ result, className }: StatsDisplayProps) {
             <Card className={cn("", className)}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
-                        <Coffee className="h-5 w-5" />
+                        <Logo className="h-5 w-5" />
                         Detection Statistics
                     </CardTitle>
                 </CardHeader>
@@ -45,7 +46,7 @@ export function StatsDisplay({ result, className }: StatsDisplayProps) {
         <Card className={cn("", className)}>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                    <Coffee className="h-5 w-5" />
+                    <Logo className="h-5 w-5" />
                     Detection Statistics
                 </CardTitle>
             </CardHeader>

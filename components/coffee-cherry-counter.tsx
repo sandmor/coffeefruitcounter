@@ -13,7 +13,8 @@ import { LoadingOverlay, ProcessingIndicator } from "@/components/loading-overla
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Coffee, Github, RefreshCw } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
+import { Github, RefreshCw } from "lucide-react";
 
 export function CoffeeCherryCounter() {
     const {
@@ -145,7 +146,7 @@ export function CoffeeCherryCounter() {
             <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="container mx-auto flex h-16 items-center justify-between px-4">
                     <div className="flex items-center gap-3">
-                        <Coffee className="h-8 w-8 text-primary" />
+                        <Logo className="h-8 w-8" />
                         <div>
                             <h1 className="text-lg font-bold">Coffee Cherry Counter</h1>
                             <p className="text-xs text-muted-foreground">

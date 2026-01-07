@@ -33,21 +33,72 @@ export async function checkWebGPU(): Promise<boolean> {
     }
 }
 
+// Helper to fetch with progress tracking
+async function fetchWithProgress(
+    url: string,
+    onProgress: (progress: number, message: string) => void,
+    startProgress: number,
+    endProgress: number
+): Promise<ArrayBuffer> {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+    }
+
+    const contentLength = response.headers.get('Content-Length');
+    const total = contentLength ? parseInt(contentLength, 10) : 0;
+    const reader = response.body?.getReader();
+
+    if (!reader) {
+        onProgress(endProgress, 'Download complete (no reader)');
+        return response.arrayBuffer();
+    }
+
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        chunks.push(value);
+        received += value.length;
+
+        if (total > 0) {
+            const percentage = (received / total);
+            // Map 0-1 to startProgress-endProgress
+            const currentProgress = startProgress + (percentage * (endProgress - startProgress));
+            onProgress(currentProgress, `Downloading WASM: ${Math.round(percentage * 100)}%`);
+        } else {
+            // Fallback if no content-length
+            onProgress(startProgress + 10, `Downloading WASM: ${(received / 1024 / 1024).toFixed(2)}MB`);
+        }
+    }
+
+    // Concatenate chunks
+    const result = new Uint8Array(received);
+    let position = 0;
+    for (const chunk of chunks) {
+        result.set(chunk, position);
+        position += chunk.length;
+    }
+
+    return result.buffer;
+}
+
 // Load the WASM module
 export async function loadWasm(
     onProgress?: (progress: number, message: string) => void
 ): Promise<void> {
     if (wasmModule) return;
 
-    onProgress?.(10, 'Checking SIMD support...');
+    onProgress?.(5, 'Checking SIMD support...');
     const useSIMD = await simdSupported();
 
-    onProgress?.(20, `Loading WASM module (${useSIMD ? 'SIMD' : 'No SIMD'})...`);
+    onProgress?.(10, `Preparing to load ${useSIMD ? 'SIMD' : 'Standard'} module...`);
 
     const variant = useSIMD ? 'simd' : 'no_simd';
     
-    // Construct the remote base URL
-    // Default to a known location or fail if not set in production
     const version = process.env.NEXT_PUBLIC_WASM_VERSION || 'latest';
     const baseUrl = process.env.NEXT_PUBLIC_WASM_BASE_URL 
         ? process.env.NEXT_PUBLIC_WASM_BASE_URL.replace(/\/$/, '') 
@@ -57,28 +108,25 @@ export async function loadWasm(
         console.warn('NEXT_PUBLIC_WASM_BASE_URL is not set. WASM loading may fail.');
     }
 
-    // Full URL to the JS entry point
     const jsUrl = `${baseUrl}/wasm/${version}/${variant}/yolo_wasm.js`;
     const wasmUrl = `${baseUrl}/wasm/${version}/${variant}/yolo_wasm_bg.wasm`;
 
     try {
-        // Load the JS module from the remote URL
-        // We assume the JS file is ES module compatible
-        onProgress?.(30, `Fetching JS from ${jsUrl}...`);
-        
-        // Use a standard dynamic import with the full URL
-        // @ts-ignore - Dynamic import with string allows loading remote modules
+        // 1. Fetch the JS shim
+        onProgress?.(15, 'Loading JS shim...');
+        // @ts-ignore
         const wasmImport = await import(/* webpackIgnore: true */ jsUrl);
 
-        onProgress?.(50, 'Initializing WASM...');
+        // 2. Download the WASM binary with progress tracking (15% -> 85%)
+        const wasmBuffer = await fetchWithProgress(wasmUrl, onProgress || (() => {}), 15, 85);
+
+        // 3. Initialize WASM with the downloaded buffer
+        onProgress?.(85, 'Compiling WebAssembly...');
         
-        // The default export is the init function
-        // We pass the full URL to the .wasm binary to ensure it loads correctly
-        // regardless of where the JS file thinks it is.
-        await wasmImport.default(wasmUrl);
+        await wasmImport.default(wasmBuffer);
         
         wasmModule = wasmImport as WasmModule;
-        onProgress?.(60, 'WASM module loaded');
+        onProgress?.(90, 'WASM module loaded');
     } catch (error) {
         console.error('Failed to load WASM module:', error);
         throw new Error('Failed to load WASM module. Please ensure the WASM files are built.');
@@ -100,10 +148,10 @@ export async function initializeDetector(
         throw new Error('WASM module not loaded');
     }
 
-    onProgress?.(70, 'Creating detector instance...');
+    onProgress?.(90, 'Creating detector instance...');
     detector = new wasmModule.CoffeeCherryDetector();
 
-    onProgress?.(80, `Loading model with ${backend} backend...`);
+    onProgress?.(95, `Loading model with ${backend} backend...`);
 
     try {
         switch (backend) {

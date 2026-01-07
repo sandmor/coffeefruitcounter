@@ -2,7 +2,8 @@
 
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Coffee } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 
 interface LoadingOverlayProps {
@@ -23,24 +24,32 @@ export function LoadingOverlay({
     return (
         <div
             className={cn(
-                "fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm",
+                "fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
                 className
             )}
         >
-            <Card className="w-full max-w-md mx-4">
-                <CardContent className="pt-6">
-                    <div className="flex flex-col items-center gap-4">
-                        <div className="relative">
-                            <Coffee className="h-12 w-12 text-primary animate-pulse" />
-                            <Loader2 className="absolute inset-0 h-12 w-12 animate-spin text-primary/30" />
-                        </div>
-                        <div className="w-full space-y-2 text-center">
-                            <Progress value={progress} className="h-2" />
-                            <p className="text-sm text-muted-foreground">{message}</p>
-                        </div>
+            <div className="flex w-full max-w-sm flex-col items-center gap-6 p-6 animate-in fade-in zoom-in-95 duration-300">
+                <div className="relative flex items-center justify-center">
+                    {/* Outer glow ring */}
+                    <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl animate-pulse" />
+                    
+                    {/* Hero Logo */}
+                    <Logo className="relative h-20 w-20 animate-bounce duration-[2000ms]" />
+                </div>
+
+                <div className="w-full space-y-3 text-center">
+                    <div className="space-y-1">
+                        <h3 className="text-lg font-semibold tracking-tight">Initializing AI</h3>
+                        <p className="text-sm text-muted-foreground animate-pulse">{message}</p>
                     </div>
-                </CardContent>
-            </Card>
+                    
+                    <Progress value={progress} className="h-1.5 w-full bg-primary/20" />
+                    
+                    <p className="text-xs font-mono text-muted-foreground/60">
+                        {Math.round(progress)}% COMPLETE
+                    </p>
+                </div>
+            </div>
         </div>
     );
 }
