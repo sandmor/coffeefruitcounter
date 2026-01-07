@@ -1,0 +1,31 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    /* Default (Light Mode) */
+    :root {
+      --bean: #5D4037;    /* Deep Brown */
+      --bracket: #15803d; /* Strong Green */
+    }
+
+    /* Dark Mode Override */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bean: #D4B08C;    /* Latte / Gold */
+        --bracket: #4ADE80; /* Neon Green */
+      }
+    }
+  </style>
+
+  <!-- Rotated Coffee Bean -->
+  <g transform="rotate(-45 16 16)">
+    <!-- Main Body -->
+    <rect x="9" y="5" width="14" height="22" rx="7" stroke="var(--bean)" stroke-width="3" />
+    <!-- Center Split -->
+    <path d="M16 5V27" stroke="var(--bean)" stroke-width="3" stroke-linecap="round" />
+  </g>
+  
+  <!-- Detection Brackets -->
+  <path d="M3 9V5H7" stroke="var(--bracket)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M29 9V5H25" stroke="var(--bracket)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M3 23V27H7" stroke="var(--bracket)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M29 23V27H25" stroke="var(--bracket)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
